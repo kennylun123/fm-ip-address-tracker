@@ -1,0 +1,23 @@
+/* ------------- Utility ------------------ */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.textNeutral100 {
+  color: hsl(var(--clr-neutral-100));
+}
+
+.textNeutral200 {
+  color: hsl(var(--clr-neutral-200));
+}
+
+.textCenter {
+  text-align: center;
+}
