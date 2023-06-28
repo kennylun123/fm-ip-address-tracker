@@ -21,3 +21,9 @@
 .textCenter {
   text-align: center;
 }
+
+@media (min-width: 65rem) {
+  .lgTextLeft {
+    text-align: left;
+  }
+}

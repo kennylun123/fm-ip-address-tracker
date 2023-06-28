@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-}
+  // Enable strict mode will render useEffect() twice in dev mode.
+  reactStrictMode: false,
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

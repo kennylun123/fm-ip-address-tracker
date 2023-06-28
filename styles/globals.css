@@ -3,12 +3,21 @@
   --clr-neutral-200: 0 0% 59%;
   --clr-neutral-400: 0 0% 17%;
   --clr-neutral-800: 0 0% 0%;
-  --ff-sans-serif: "Rubik", sans-serif;
+  /* --ff-sans-serif: "Rubik", sans-serif; */
   --fs-200: 0.65rem;
   --fs-400: 1.125rem;
+  --fs-500: 1.25rem;
+  --fs-600: 1.625rem;
   --fw-400: 400;
   --fw-500: 500;
   --fw-700: 700;
+}
+@media (min-width: 65rem) {
+  :root {
+    --fs-200: 0.8rem;
+    --fs-500: 1.6rem;
+    --fs-600: 2rem;
+  }
 }
 
 /* ------------------------- */
@@ -54,7 +63,7 @@ body {
   min-height: 100vh;
   text-rendering: optimizeSpeed;
   line-height: 1.5;
-  font-family: var(--ff-sans-serif);
+  /* font-family: var(--ff-sans-serif); */
   font-size: var(--fs-400);
   font-weight: var(--fw-400);
   color: hsl(var(--clr-neutral-400));
@@ -100,5 +109,4 @@ input,
 button {
   border: 0;
   padding: 0;
-  /* background-color: #fff; */
 }

@@ -1,12 +1,102 @@
+/* ---- Breakdown ---- */
+// Prerequisite:
+// 1. Install npm packages: react-leaflet, leaflet
+// 2. Create Map component
+// 3. Disable ssr for Map component using "next/dynamic" **important**
+
+// General Steps:
+// 1. User enter a domain / ip adress
+// 2. When the button is clicked, validate input is ip adress or domain
+// 3. When submit button is pressed, collect input value in useState hook
+// 4. Make an internal POST request to /api/ipify with useEffect hook, listening to the update of user input data
+// 5. Make a GET request to external API
+// 6. Response to client side
+// 7. Update the data state and UI
+
+import React from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
-import Image from "next/image";
-// import { Inter } from "next/font/google";
+import dynamic from "next/dynamic";
 import styles from "@/styles/Home.module.css";
 import utils from "@/styles/Utils.module.css";
-
-// const inter = Inter({ subsets: ["latin"] });
+import TopSection from "@/components/TopSection";
+import DataDisplay from "@/components/DataDisplay";
 
 export default function Home() {
+  const [inputValue, setInputValue] = useState({
+    type: "",
+    value: "",
+  });
+  const [data, setData] = useState({
+    ip: "",
+    country: "",
+    city: "",
+    lat: 0,
+    lng: 0,
+    postalCode: "",
+    timezone: "",
+    isp: "",
+  });
+
+  useEffect(() => {
+    const handleInputValueUpdate = async () => {
+      const response = await fetch(`/api/ipify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(inputValue),
+      });
+      const data = await response.json();
+      setData({
+        ip: data.ip,
+        country: data.location.country,
+        city: data.location.city,
+        lat: data.location.lat,
+        lng: data.location.lng,
+        postalCode: data.location.postalCode,
+        timezone: data.location.timezone,
+        isp: data.isp,
+      });
+      // console.log(data);
+    };
+    handleInputValueUpdate();
+  }, [inputValue]);
+
+  const MapWithNoSSR = React.useMemo(() =>
+    dynamic(() => import("@/components/Map"), {
+      // This line is important. It's what prevents server-side render
+      ssr: false,
+    })
+  );
+
+  const validateInput = (input) => {
+    // No API call is executed if same input
+    if (input.value === inputValue.value) {
+      return;
+    }
+    // Regular expressions for IP address and domain
+    var ipAddressRegex = /^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/;
+    var domainRegex =
+      /^[a-zA-Z][a-zA-Z0-9-]*?(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$/;
+
+    if (ipAddressRegex.test(input.value)) {
+      setInputValue({
+        type: "ipAddress",
+        value: input.value,
+      });
+      input.value = "";
+    } else if (domainRegex.test(input.value)) {
+      setInputValue({
+        type: "domain",
+        value: input.value,
+      });
+      input.value = "";
+    } else {
+      return alert("Please enter a valid IP address or URL");
+    }
+  };
+
   return (
     <>
       <Head>
@@ -14,68 +104,22 @@ export default function Home() {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/favicon.ico" />
-
-        {/* Google Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
-        {/* Leaflet CSS file */}
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossorigin=""
-        />
-        {/* Leaflet JavaScript file */}
-        <script
-          src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin=""
-        />
       </Head>
       <div className={`${styles.container} ${styles.grid}`}>
         <main>
           <h1 className={utils.srOnly}>IP Address Tracker</h1>
-          <section className={`${styles.headerSection} ${styles.flex}`}>
-            <h2>IP Address Tracker</h2>
-            <form
-              class={styles.flex}
-              action=""
-              placeholder="Search for any IP address or domain"
-            >
-              <input type="text" />
-              <button></button>
-            </form>
-          </section>
-          <section className={styles.dataDisplay}>
-            <ul className={`${styles.flex} ${utils.textCenter}`} role="list">
-              <li>
-                <div>IP Address</div>
-                <div>1.2</div>
-              </li>
-              <li>
-                <div>Location</div>
-                <div>UK</div>
-              </li>
-              <li>
-                <div>Timezone</div>
-                <div>
-                  <span>UTC</span>-12:30
-                </div>
-              </li>
-              <li>
-                <div>ISP</div>
-                <div>SpaceX</div>
-              </li>
-            </ul>
-          </section>
-          <div class={styles.map} id="map"></div>
+          <TopSection onSearch={validateInput} />
+
+          <DataDisplay data={data} />
+
+          <MapWithNoSSR
+            className={styles.map}
+            position={[data.lat, data.lng]}
+            popupText={data.isp}
+          />
         </main>
 
-        <footer>
+        <footer className={utils.textCenter}>
           Challenge by{" "}
           <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">
             Frontend Mentor
@@ -84,109 +128,5 @@ export default function Home() {
         </footer>
       </div>
     </>
-
-    // <>
-    //   <Head>
-    //     <title>Create Next App</title>
-    //     <meta name="description" content="Generated by create next app" />
-    //     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    //     <link rel="icon" href="/favicon.ico" />
-    //   </Head>
-    //   <main className={`${styles.main} ${inter.className}`}>
-    //     <div className={styles.description}>
-    //       <p>
-    //         Get started by editing&nbsp;
-    //         <code className={styles.code}>pages/index.js</code>
-    //       </p>
-    //       <div>
-    //         <a
-    //           href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-    //           target="_blank"
-    //           rel="noopener noreferrer"
-    //         >
-    //           By{' '}
-    //           <Image
-    //             src="/vercel.svg"
-    //             alt="Vercel Logo"
-    //             className={styles.vercelLogo}
-    //             width={100}
-    //             height={24}
-    //             priority
-    //           />
-    //         </a>
-    //       </div>
-    //     </div>
-
-    //     <div className={styles.center}>
-    //       <Image
-    //         className={styles.logo}
-    //         src="/next.svg"
-    //         alt="Next.js Logo"
-    //         width={180}
-    //         height={37}
-    //         priority
-    //       />
-    //     </div>
-
-    //     <div className={styles.grid}>
-    //       <a
-    //         href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-    //         className={styles.card}
-    //         target="_blank"
-    //         rel="noopener noreferrer"
-    //       >
-    //         <h2>
-    //           Docs <span>-&gt;</span>
-    //         </h2>
-    //         <p>
-    //           Find in-depth information about Next.js features and&nbsp;API.
-    //         </p>
-    //       </a>
-
-    //       <a
-    //         href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-    //         className={styles.card}
-    //         target="_blank"
-    //         rel="noopener noreferrer"
-    //       >
-    //         <h2>
-    //           Learn <span>-&gt;</span>
-    //         </h2>
-    //         <p>
-    //           Learn about Next.js in an interactive course with&nbsp;quizzes!
-    //         </p>
-    //       </a>
-
-    //       <a
-    //         href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-    //         className={styles.card}
-    //         target="_blank"
-    //         rel="noopener noreferrer"
-    //       >
-    //         <h2>
-    //           Templates <span>-&gt;</span>
-    //         </h2>
-    //         <p>
-    //           Discover and deploy boilerplate example Next.js&nbsp;projects.
-    //         </p>
-    //       </a>
-
-    //       <a
-    //         href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-    //         className={styles.card}
-    //         target="_blank"
-    //         rel="noopener noreferrer"
-    //       >
-    //         <h2>
-    //           Deploy <span>-&gt;</span>
-    //         </h2>
-    //         <p>
-    //           Instantly deploy your Next.js site to a shareable URL
-    //           with&nbsp;Vercel.
-    //         </p>
-    //       </a>
-    //     </div>
-    //   </main>
-    // </>
   );
 }
