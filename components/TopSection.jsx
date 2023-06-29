@@ -20,6 +20,7 @@ export default function TopSection({ onSearch }) {
           type="submit"
           className={styles.arrow}
           onClick={handleClick}
+          aria-label="Search Button"
         ></button>
       </form>
     </section>

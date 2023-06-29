@@ -32,8 +32,8 @@ Users should be able to:
 <img src="screenshots/component-mobile.png" width="400px" alt="mobile-version" />
 ### Links
 
-- Solution URL: [Add solution URL here](https://your-solution-url.com)
-- Live Site URL: [Add live site URL here](https://your-live-site-url.com)
+- Solution URL: [https://www.frontendmentor.io/solutions/-nextjs-responsive-ip-address-tracker-using-grid-and-flex-box-TYWvCL7kMl](https://www.frontendmentor.io/solutions/-nextjs-responsive-ip-address-tracker-using-grid-and-flex-box-TYWvCL7kMl)
+- Live Site URL: [https://fm-ip-address-tracker-kennylun123.vercel.app/](https://fm-ip-address-tracker-kennylun123.vercel.app/)
 
 ## My process
 
